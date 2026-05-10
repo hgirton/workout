@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Movement</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0c0a;
+    --cream: #f0ead8;
+    --warm: #d4c5a9;
+    --muted: #7a6f5e;
+    --accent: #c4694f;
+    --sage: #6b8c6e;
+    --gold: #c9a84c;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+font-family: ‘Outfit’, sans-serif;
+height: 100vh;
+overflow: hidden;
+cursor: none;
+}
+
+.slideshow { position: relative; width: 100vw; height: 100vh; }
+
+.slide {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 8vw;
+opacity: 0;
+transition: opacity 1s ease;
+pointer-events: none;
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+.slide-bg { position: absolute; inset: 0; z-index: 0; }
+
+.slide[data-section=“warmup”] .slide-bg { background: radial-gradient(ellipse at 20% 60%, #1a2a1e 0%, #0e0c0a 60%); }
+.slide[data-section=“warmup”]::after { content: ‘’; position: absolute; inset: 0; background: radial-gradient(ellipse at 70% 30%, rgba(107,140,110,0.12) 0%, transparent 60%); z-index: 1; }
+
+.slide[data-section=“bridge”] .slide-bg { background: radial-gradient(ellipse at 30% 70%, #1f1508 0%, #0e0c0a 60%); }
+.slide[data-section=“bridge”]::after { content: ‘’; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 20%, rgba(201,168,76,0.1) 0%, transparent 60%); z-index: 1; }
+
+.slide[data-section=“circuit”] .slide-bg { background: radial-gradient(ellipse at 10% 80%, #1f0d0a 0%, #0e0c0a 60%); }
+.slide[data-section=“circuit”]::after { content: ‘’; position: absolute; inset: 0; background: radial-gradient(ellipse at 80% 20%, rgba(196,105,79,0.15) 0%, transparent 60%); z-index: 1; }
+
+.slide[data-section=“cooldown”] .slide-bg { background: radial-gradient(ellipse at 50% 50%, #0a0e1a 0%, #0e0c0a 70%); }
+.slide[data-section=“cooldown”]::after { content: ‘’; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 60%, rgba(100,120,180,0.08) 0%, transparent 60%); z-index: 1; }
+
+.slide-content { position: relative; z-index: 2; max-width: 780px; }
+
+.section-label {
+font-size: clamp(0.6rem, 1vw, 0.75rem);
+font-weight: 500;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+margin-bottom: 1.5rem;
+display: flex;
+align-items: center;
+gap: 0.75rem;
+}
+.section-label::after { content: ‘’; display: block; width: 40px; height: 1px; background: currentColor; opacity: 0.4; }
+
+.slide[data-section=“warmup”] .section-label { color: var(–sage); }
+.slide[data-section=“bridge”] .section-label { color: var(–gold); }
+.slide[data-section=“circuit”] .section-label { color: var(–accent); }
+.slide[data-section=“cooldown”] .section-label { color: #8899cc; }
+
+.slide-title {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: clamp(2.8rem, 7vw, 6rem);
+font-weight: 300;
+line-height: 1;
+color: var(–cream);
+margin-bottom: 0.3em;
+}
+.slide-title em { font-style: italic; }
+
+.slide-subtitle {
+font-size: clamp(0.8rem, 1.5vw, 1rem);
+font-weight: 300;
+color: var(–warm);
+margin-bottom: 2.5rem;
+}
+
+.exercise-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+
+.exercise-item {
+display: grid;
+grid-template-columns: auto 1fr auto;
+align-items: start;
+gap: 1rem;
+padding: 0.8rem 1rem;
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.07);
+border-radius: 4px;
+}
+
+.exercise-num { font-family: ‘Cormorant Garamond’, serif; font-size: 1.1rem; font-style: italic; color: var(–muted); min-width: 1.5rem; padding-top: 1px; }
+.exercise-name { font-size: clamp(0.8rem, 1.3vw, 0.92rem); font-weight: 500; color: var(–cream); margin-bottom: 0.15rem; }
+.exercise-desc { font-size: clamp(0.65rem, 1vw, 0.75rem); font-weight: 300; color: var(–muted); line-height: 1.5; }
+.exercise-reps { font-size: 0.72rem; font-weight: 500; color: var(–accent); white-space: nowrap; text-align: right; padding-top: 2px; }
+
+.slide[data-section=“warmup”] .exercise-reps { color: var(–sage); }
+.slide[data-section=“bridge”] .exercise-reps { color: var(–gold); }
+.slide[data-section=“cooldown”] .exercise-reps { color: #8899cc; }
+
+.music-bar {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+padding: 0.6rem 1rem;
+background: rgba(255,255,255,0.05);
+border-left: 2px solid var(–accent);
+border-radius: 0 4px 4px 0;
+margin-top: 0.5rem;
+}
+.slide[data-section=“warmup”] .music-bar { border-color: var(–sage); }
+.slide[data-section=“bridge”] .music-bar { border-color: var(–gold); }
+.slide[data-section=“cooldown”] .music-bar { border-color: #8899cc; }
+
+.music-note { font-size: 0.9rem; opacity: 0.7; }
+.music-text { font-size: 0.72rem; color: var(–warm); font-weight: 300; }
+.music-text strong { font-weight: 500; color: var(–cream); }
+
+.round-badge {
+display: inline-block;
+font-size: 0.65rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+padding: 0.3rem 0.8rem;
+border: 1px solid var(–accent);
+color: var(–accent);
+border-radius: 2px;
+margin-bottom: 1.5rem;
+}
+.slide[data-section=“warmup”] .round-badge { border-color: var(–sage); color: var(–sage); }
+.slide[data-section=“bridge”] .round-badge { border-color: var(–gold); color: var(–gold); }
+.slide[data-section=“cooldown”] .round-badge { border-color: #8899cc; color: #8899cc; }
+
+.progress-container { position: fixed; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.06); z-index: 100; }
+.progress-bar { height: 100%; background: var(–accent); width: 0%; }
+
+.slide-counter { position: fixed; bottom: 20px; right: 8vw; font-size: 0.65rem; letter-spacing: 0.15em; color: var(–muted); z-index: 100; }
+
+.controls { position: fixed; bottom: 20px; left: 8vw; display: flex; gap: 0.75rem; z-index: 100; }
+
+.btn {
+background: rgba(255,255,255,0.07);
+border: 1px solid rgba(255,255,255,0.1);
+color: var(–warm);
+font-family: ‘Outfit’, sans-serif;
+font-size: 0.65rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+padding: 0.4rem 0.9rem;
+border-radius: 2px;
+cursor: pointer;
+transition: all 0.2s;
+}
+.btn:hover { background: rgba(255,255,255,0.12); color: var(–cream); }
+.btn.paused { border-color: var(–accent); color: var(–accent); }
+
+body::before {
+content: ‘’;
+position: fixed;
+inset: -50%;
+width: 200%;
+height: 200%;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘1’/%3E%3C/svg%3E”);
+opacity: 0.025;
+pointer-events: none;
+z-index: 999;
+}
+
+.done-graphic {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: clamp(6rem, 18vw, 14rem);
+font-weight: 300;
+font-style: italic;
+color: rgba(240,234,216,0.06);
+position: absolute;
+right: 5vw;
+bottom: -2vw;
+line-height: 1;
+pointer-events: none;
+z-index: 1;
+}
+</style>
+
+</head>
+<body>
+
+<div class="slideshow" id="slideshow">
+
+  <!-- SLIDE 1: WARM-UP -->
+
+  <div class="slide active" data-section="warmup" data-duration="419">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="section-label">Warm-Up · 7 min</div>
+      <h1 class="slide-title">Wake the<br><em>body up.</em></h1>
+      <p class="slide-subtitle">Move slowly. These are signals, not demands.</p>
+      <div class="exercise-list">
+        <div class="exercise-item">
+          <span class="exercise-num">1</span>
+          <div><div class="exercise-name">90/90 Hip Switches</div><div class="exercise-desc">Sit on the floor, both legs at 90°. Slowly rotate side to side like windshield wipers. Back tall.</div></div>
+          <div class="exercise-reps">8 each side</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">2</span>
+          <div><div class="exercise-name">Cat / Cow</div><div class="exercise-desc">On hands and knees. Inhale — belly drops, look up. Exhale — round spine up, tuck chin. Flow.</div></div>
+          <div class="exercise-reps">10 breaths</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">3</span>
+          <div><div class="exercise-name">Glute Bridges</div><div class="exercise-desc">On your back, knees bent. Press through heels, lift hips. Squeeze at top. Lower slow.</div></div>
+          <div class="exercise-reps">15 reps · slow</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">4</span>
+          <div><div class="exercise-name">Ankle Circles + Calf Raises</div><div class="exercise-desc">Trace slow circles each foot, then rise onto balls of feet and lower with control. Wall for balance is fine.</div></div>
+          <div class="exercise-reps">10 circles + 10 raises</div>
+        </div>
+      </div>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text"><strong>Burning</strong> — Maggie Rogers &nbsp;·&nbsp; then &nbsp;<strong>Lady Lady</strong> — Olivia Dean</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: BRIDGE -->
+
+  <div class="slide" data-section="bridge" data-duration="213">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="round-badge">Bridge In</div>
+      <h1 class="slide-title">Getting<br><em>ready.</em></h1>
+      <p class="slide-subtitle">Shake out your hands. Take a breath. Round 1 starts next song.</p>
+      <div class="exercise-list">
+        <div class="exercise-item">
+          <span class="exercise-num">→</span>
+          <div><div class="exercise-name">Set up your space</div><div class="exercise-desc">Kettlebells nearby — 10lb and 15lb. Resistance band out. Mat ready. Water within reach.</div></div>
+          <div class="exercise-reps">Ready</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">→</span>
+          <div><div class="exercise-name">Remind yourself</div><div class="exercise-desc">6 exercises. Move through them back to back. Rest 60–90 sec. Then Round 2. Two rounds total.</div></div>
+          <div class="exercise-reps">2 rounds</div>
+        </div>
+      </div>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text"><strong>I Just Might</strong> — Bruno Mars &nbsp;·&nbsp; 3:33</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: CIRCUIT ROUND 1 -->
+
+  <div class="slide" data-section="circuit" data-duration="511">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="round-badge">Round 1</div>
+      <h1 class="slide-title">Working<br><em>circuit.</em></h1>
+      <p class="slide-subtitle">All 6 back to back. Rest 60–90 sec after. Then Round 2.</p>
+      <div class="exercise-list">
+        <div class="exercise-item">
+          <span class="exercise-num">1</span>
+          <div><div class="exercise-name">Goblet Squat</div><div class="exercise-desc">10lb KB at chest. Feet hip-width, toes out. Sit back and down — chest up. Drive through heels to stand.</div></div>
+          <div class="exercise-reps">10 reps · 10lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">2</span>
+          <div><div class="exercise-name">Band Pull-Apart</div><div class="exercise-desc">Arms straight at shoulder height. Pull band apart squeezing shoulder blades. Control the return.</div></div>
+          <div class="exercise-reps">15 reps · medium</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">3</span>
+          <div><div class="exercise-name">Single-Leg Deadlift (Assisted)</div><div class="exercise-desc">One hand on wall. 10lb KB opposite hand. Hinge at hip — torso tips forward, free leg floats back. Return.</div></div>
+          <div class="exercise-reps">8 each side · 10lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">4</span>
+          <div><div class="exercise-name">Kettlebell Deadlift</div><div class="exercise-desc">15lb KB on floor. Hinge, grip, stand by squeezing glutes and driving hips forward. Lower with control.</div></div>
+          <div class="exercise-reps">10 reps · 15lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">5</span>
+          <div><div class="exercise-name">Tall Kneeling Press</div><div class="exercise-desc">Both knees on mat. 2lb weights or light band. Press overhead. If back arches — too heavy.</div></div>
+          <div class="exercise-reps">12 reps · light</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">6</span>
+          <div><div class="exercise-name">Dead Bug</div><div class="exercise-desc">Back down, arms up, shins parallel. Lower opposite arm + leg. Ribs stay stapled to floor. Slow is hard.</div></div>
+          <div class="exercise-reps">8 each side</div>
+        </div>
+      </div>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text"><strong>Alaska</strong> — Maggie Rogers &nbsp;·&nbsp; then &nbsp;<strong>Make Me Feel</strong> — Janelle Monáe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: REST -->
+
+  <div class="slide" data-section="circuit" data-duration="90">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="round-badge">Rest · 90 sec</div>
+      <h1 class="slide-title"><em>Breathe.</em></h1>
+      <p class="slide-subtitle">Shake it out. Take the full 90 seconds. Round 2 is the same circuit — push a little more.</p>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text">Rest here. Round 2 on the next slide.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: CIRCUIT ROUND 2 -->
+
+  <div class="slide" data-section="circuit" data-duration="631">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="round-badge">Round 2 · Push More</div>
+      <h1 class="slide-title">Same<br><em>circuit.</em></h1>
+      <p class="slide-subtitle">You know what you're doing now. A little more on each one.</p>
+      <div class="exercise-list">
+        <div class="exercise-item">
+          <span class="exercise-num">1</span>
+          <div><div class="exercise-name">Goblet Squat</div><div class="exercise-desc">Go a little lower. Pause at the bottom for a beat before driving up.</div></div>
+          <div class="exercise-reps">10 reps · 10lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">2</span>
+          <div><div class="exercise-name">Band Pull-Apart</div><div class="exercise-desc">Slower on the return. Feel the squeeze between your shoulder blades.</div></div>
+          <div class="exercise-reps">15 reps</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">3</span>
+          <div><div class="exercise-name">Single-Leg Deadlift</div><div class="exercise-desc">Try lightening the wall touch — fingertips only if you can.</div></div>
+          <div class="exercise-reps">8 each side · 10lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">4</span>
+          <div><div class="exercise-name">Kettlebell Deadlift</div><div class="exercise-desc">Slower on the way down. 3-count lower. This is the most important one.</div></div>
+          <div class="exercise-reps">10 reps · 15lb</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">5</span>
+          <div><div class="exercise-name">Tall Kneeling Press</div><div class="exercise-desc">Stay tall. Don't let your ribs flare on the press up.</div></div>
+          <div class="exercise-reps">12 reps</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">6</span>
+          <div><div class="exercise-name">Dead Bug</div><div class="exercise-desc">Even slower. Add a 2-second hold at the bottom if it still feels easy.</div></div>
+          <div class="exercise-reps">8 each side</div>
+        </div>
+      </div>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text"><strong>Inside and Out</strong> — Feist &nbsp;·&nbsp; <strong>Overdrive</strong> — Maggie Rogers &nbsp;·&nbsp; <strong>September</strong> — Earth Wind & Fire</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: COOL-DOWN -->
+
+  <div class="slide" data-section="cooldown" data-duration="455">
+    <div class="slide-bg"></div>
+    <div class="slide-content">
+      <div class="section-label">Cool-Down · 8 min</div>
+      <h1 class="slide-title">Let it<br><em>settle.</em></h1>
+      <p class="slide-subtitle">You did the work. Now let your nervous system downshift.</p>
+      <div class="exercise-list">
+        <div class="exercise-item">
+          <span class="exercise-num">1</span>
+          <div><div class="exercise-name">Standing Figure-Four Stretch</div><div class="exercise-desc">Cross ankle over opposite knee. Bend into standing leg. Feel the outer hip. Hold 30 sec each side.</div></div>
+          <div class="exercise-reps">30 sec each</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">2</span>
+          <div><div class="exercise-name">Half-Kneeling Hip Flexor</div><div class="exercise-desc">One knee on mat, one foot forward. Tuck pelvis, lean forward gently. Breathe into the front of the back hip.</div></div>
+          <div class="exercise-reps">30 sec each</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">3</span>
+          <div><div class="exercise-name">Supine Hamstring Stretch</div><div class="exercise-desc">On your back. Band around one foot, straighten leg toward ceiling. Other leg flat. Pull gently.</div></div>
+          <div class="exercise-reps">30 sec each</div>
+        </div>
+        <div class="exercise-item">
+          <span class="exercise-num">4</span>
+          <div><div class="exercise-name">Child's Pose</div><div class="exercise-desc">Kneel, hips back toward heels, arms long. Forehead down. Just breathe. You earned this minute.</div></div>
+          <div class="exercise-reps">60 seconds</div>
+        </div>
+      </div>
+      <div class="music-bar">
+        <span class="music-note">♪</span>
+        <div class="music-text"><strong>Dreams</strong> — Fleetwood Mac &nbsp;·&nbsp; then &nbsp;<strong>Dive</strong> — Olivia Dean</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: DONE -->
+
+  <div class="slide" data-section="cooldown" data-duration="9999">
+    <div class="slide-bg"></div>
+    <div class="done-graphic">done.</div>
+    <div class="slide-content">
+      <div class="section-label">Phase 1 · Complete</div>
+      <h1 class="slide-title"><em>That's</em><br>the work.</h1>
+      <p class="slide-subtitle" style="margin-bottom: 1.5rem;">30 minutes. Two rounds. You showed up.</p>
+      <p class="slide-subtitle" style="color: var(--muted); font-size: 0.78rem; line-height: 1.8;">
+        Protein within the hour if you can. Water.<br>
+        Come back in 2 days — Mon / Wed / Fri.<br>
+        Same routine until it feels easy. Then we add load.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+<div class="slide-counter" id="slideCounter">1 / 7</div>
+<div class="controls">
+  <button class="btn" id="pauseBtn" onclick="togglePause()">Pause</button>
+  <button class="btn" onclick="prevSlide()">← Prev</button>
+  <button class="btn" onclick="nextSlide()">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const slideCounter = document.getElementById('slideCounter');
+  const pauseBtn = document.getElementById('pauseBtn');
+
+  let current = 0, paused = false, timer = null, startTime = null, elapsed = 0;
+
+  function getDuration(i) { return parseInt(slides[i].dataset.duration) * 1000; }
+
+  function showSlide(i) {
+    slides.forEach((s, j) => s.classList.toggle('active', i === j));
+    slideCounter.textContent = `${i + 1} / ${slides.length}`;
+    progressBar.style.width = '0%';
+  }
+
+  function startTimer() {
+    const dur = getDuration(current);
+    if (dur >= 9999000) return;
+    startTime = performance.now() - elapsed;
+    function tick() {
+      if (paused) return;
+      elapsed = performance.now() - startTime;
+      progressBar.style.width = Math.min((elapsed / dur) * 100, 100) + '%';
+      if (elapsed >= dur) {
+        elapsed = 0;
+        current = Math.min(current + 1, slides.length - 1);
+        showSlide(current);
+        startTimer();
+        return;
+      }
+      timer = requestAnimationFrame(tick);
+    }
+    timer = requestAnimationFrame(tick);
+  }
+
+  function togglePause() {
+    paused = !paused;
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    pauseBtn.classList.toggle('paused', paused);
+    if (!paused) startTimer(); else cancelAnimationFrame(timer);
+  }
+
+  function nextSlide() {
+    cancelAnimationFrame(timer); elapsed = 0;
+    current = Math.min(current + 1, slides.length - 1);
+    showSlide(current); startTimer();
+  }
+
+  function prevSlide() {
+    cancelAnimationFrame(timer); elapsed = 0;
+    current = Math.max(current - 1, 0);
+    showSlide(current); startTimer();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'p' || e.key === 'P') togglePause();
+  });
+
+  showSlide(0);
+  startTimer();
+</script>
+
+</body>
+</html>
