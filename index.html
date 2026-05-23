@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Movement</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #f7f4ef;
+    --white: #ffffff;
+    --border: #e0d9ce;
+    --dark: #1e1a16;
+    --body: #3d3730;
+    --muted: #9a8f82;
+    --sage: #4a7050;
+    --sage-bg: #eef4ed;
+    --terra: #b85a40;
+    --terra-bg: #fdf0ec;
+    --gold: #8a6820;
+    --gold-bg: #fdf5e4;
+    --blue: #3d5a8a;
+    --blue-bg: #edf1f8;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    color: var(--dark);
+  }
+
+  /* FULL PAGE GRID — 16:9 locked */
+  .page {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 7vh 86vh 7vh;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
+  /* HEADER */
+  .header {
+    grid-column: 1 / -1;
+    background: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2vw;
+    border-bottom: 1px solid #333;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2vh;
+    font-weight: 400;
+    color: #f0ead8;
+    white-space: nowrap;
+  }
+  .header h1 em { font-style: italic; color: #b8a888; font-weight: 300; }
+
+  .header-pills { display: flex; gap: 1vw; }
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.1vh;
+    color: #7a7060;
+    border: 1px solid #333;
+    padding: 0.2vh 0.7vw;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 1.2vh 1.2vw 1vh;
+    gap: 0.6vh;
+  }
+  .panel:last-of-type { border-right: none; }
+
+  .top-bar {
+    height: 2.5px;
+    border-radius: 2px;
+    margin: -1.2vh -1.2vw 0;
+    margin-bottom: 0.7vh;
+    flex-shrink: 0;
+  }
+  .warmup .top-bar { background: var(--sage); }
+  .circuit1 .top-bar { background: var(--terra); }
+  .circuit2 .top-bar { background: var(--terra); opacity: 0.55; }
+  .cooldown .top-bar { background: var(--blue); }
+
+  .section-tag {
+    font-size: 1vh;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .warmup .section-tag { color: var(--sage); }
+  .circuit1 .section-tag, .circuit2 .section-tag { color: var(--terra); }
+  .cooldown .section-tag { color: var(--blue); }
+
+  .panel-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.6vh;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1;
+  }
+  .panel-title em { font-style: italic; font-weight: 400; color: var(--muted); }
+
+  .panel-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 1vh;
+    color: var(--muted);
+  }
+
+  /* MUSIC CUE */
+  .music-cue {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4vw;
+    padding: 0.5vh 0.6vw;
+    border-radius: 3px;
+    border-left: 2px solid;
+    flex-shrink: 0;
+  }
+  .warmup .music-cue { background: var(--sage-bg); border-color: var(--sage); }
+  .circuit1 .music-cue, .circuit2 .music-cue { background: var(--terra-bg); border-color: var(--terra); }
+  .cooldown .music-cue { background: var(--blue-bg); border-color: var(--blue); }
+
+  .music-note { font-size: 1.3vh; opacity: 0.5; flex-shrink: 0; margin-top: 0.1vh; }
+  .music-songs { font-size: 1.1vh; color: var(--body); line-height: 1.5; font-weight: 300; }
+  .music-songs strong { font-weight: 600; color: var(--dark); }
+
+  /* EXERCISE LIST */
+  .ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4vh;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .ex-row {
+    display: grid;
+    grid-template-columns: 1.4vh 1fr auto;
+    gap: 0.5vw;
+    align-items: start;
+    padding: 0.55vh 0.5vw;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .ex-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5vh;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1;
+    padding-top: 0.2vh;
+  }
+
+  .ex-name {
+    font-size: 1.3vh;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1.2;
+    margin-bottom: 0.2vh;
+  }
+
+  .ex-desc {
+    font-size: 1.1vh;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  .ex-reps {
+    font-family: 'DM Mono', monospace;
+    font-size: 1vh;
+    white-space: nowrap;
+    text-align: right;
+    line-height: 1.4;
+    font-weight: 400;
+    padding-top: 0.2vh;
+  }
+  .warmup .ex-reps { color: var(--sage); }
+  .circuit1 .ex-reps { color: var(--terra); }
+  .circuit2 .ex-reps { color: var(--gold); }
+  .cooldown .ex-reps { color: var(--blue); }
+
+  .nudge {
+    font-size: 1vh;
+    font-style: italic;
+    color: var(--gold);
+    margin-top: 0.1vh;
+  }
+
+  /* FOOTER */
+  .footer {
+    grid-column: 1 / -1;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2vw;
+  }
+
+  .footer-note {
+    font-size: 1.1vh;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .footer-note strong { color: var(--body); font-weight: 500; }
+
+  .phase-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 1vh;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.3vh 0.7vw;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Morning Movement &nbsp;<em>Phase 1</em></h1>
+    <div class="header-pills">
+      <span class="pill">Mon · Wed · Fri</span>
+      <span class="pill">~35 min</span>
+      <span class="pill">2 rounds</span>
+    </div>
+  </div>
+
+  <!-- WARM-UP -->
+  <div class="panel warmup">
+    <div class="top-bar"></div>
+    <div class="section-tag">Warm-Up</div>
+    <div class="panel-header">
+      <div class="panel-title">Wake <em>up.</em></div>
+      <div class="panel-time">~7 min</div>
+    </div>
+    <div class="music-cue">
+      <span class="music-note">♪</span>
+      <div class="music-songs"><strong>Burning</strong> — Maggie Rogers &nbsp;·&nbsp; <strong>Lady Lady</strong> — Olivia Dean</div>
+    </div>
+    <div class="ex-list">
+      <div class="ex-row">
+        <span class="ex-num">1</span>
+        <div><div class="ex-name">90/90 Hip Switches</div><div class="ex-desc">Both legs at 90°. Rotate side to side. Back tall.</div></div>
+        <div class="ex-reps">10 each side</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">2</span>
+        <div><div class="ex-name">Cat / Cow</div><div class="ex-desc">Hands and knees. Inhale — belly drops. Exhale — round spine up.</div></div>
+        <div class="ex-reps">12 breaths</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">3</span>
+        <div><div class="ex-name">Glute Bridges</div><div class="ex-desc">Back down, knees bent. Press through heels, lift hips. Squeeze at top. Lower slow.</div></div>
+        <div class="ex-reps">20 reps · slow</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">4</span>
+        <div><div class="ex-name">Ankle Circles + Calf Raises</div><div class="ex-desc">Slow circles each foot, then rise onto balls of feet. Lower with control.</div></div>
+        <div class="ex-reps">10 circles + 15 raises</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUND 1 -->
+  <div class="panel circuit1">
+    <div class="top-bar"></div>
+    <div class="section-tag">Round 1 — all 6, then rest 90 sec</div>
+    <div class="panel-header">
+      <div class="panel-title">Circuit <em>one.</em></div>
+      <div class="panel-time">~8 min</div>
+    </div>
+    <div class="music-cue">
+      <span class="music-note">♪</span>
+      <div class="music-songs"><strong>Alaska</strong> — Maggie Rogers &nbsp;·&nbsp; <strong>Make Me Feel</strong> — Janelle Monáe</div>
+    </div>
+    <div class="ex-list">
+      <div class="ex-row">
+        <span class="ex-num">1</span>
+        <div><div class="ex-name">Goblet Squat</div><div class="ex-desc">10lb KB at chest. Feet hip-width, toes out. Sit back, chest up. Drive through heels.</div></div>
+        <div class="ex-reps">12 reps · 10lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">2</span>
+        <div><div class="ex-name">Band Pull-Apart</div><div class="ex-desc">Arms at shoulder height. Pull band apart squeezing shoulder blades. Slow return.</div></div>
+        <div class="ex-reps">18 reps · med band</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">3</span>
+        <div><div class="ex-name">Single-Leg Deadlift</div><div class="ex-desc">10lb KB. Stand on one foot. Hinge — torso tips forward, free leg floats back.</div></div>
+        <div class="ex-reps">10 each · 10lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">4</span>
+        <div><div class="ex-name">KB Deadlift</div><div class="ex-desc">15lb KB on floor. Hinge, grip, stand squeezing glutes. Lower slow.</div></div>
+        <div class="ex-reps">12 reps · 15lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">5</span>
+        <div><div class="ex-name">Dumbbell Bicep Curl</div><div class="ex-desc">10lb dumbbell. Alternate arms. Slow curl up, slow lower. Elbows at sides.</div></div>
+        <div class="ex-reps">12 each · 10lb</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">6</span>
+        <div><div class="ex-name">Dead Bug</div><div class="ex-desc">Back down, arms up, shins parallel. Lower opposite arm + leg. Ribs on floor. Slow.</div></div>
+        <div class="ex-reps">10 each side</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUND 2 -->
+  <div class="panel circuit2">
+    <div class="top-bar"></div>
+    <div class="section-tag">Round 2 — push more</div>
+    <div class="panel-header">
+      <div class="panel-title">Circuit <em>two.</em></div>
+      <div class="panel-time">~10 min</div>
+    </div>
+    <div class="music-cue">
+      <span class="music-note">♪</span>
+      <div class="music-songs"><strong>Inside and Out</strong> — Feist &nbsp;·&nbsp; <strong>Overdrive</strong> — Maggie Rogers</div>
+    </div>
+    <div class="ex-list">
+      <div class="ex-row">
+        <span class="ex-num">1</span>
+        <div><div class="ex-name">Goblet Squat</div><div class="ex-desc">Go lower. Pause at the bottom before driving up.</div><div class="nudge">Pause at the bottom</div></div>
+        <div class="ex-reps">15 reps · 10lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">2</span>
+        <div><div class="ex-name">KB Swing</div><div class="ex-desc">15lb KB. Hinge at hips, swing between legs, drive hips forward to chest height. Power from glutes.</div></div>
+        <div class="ex-reps">15 reps · 15lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">3</span>
+        <div><div class="ex-name">Single-Leg Deadlift</div><div class="ex-desc">No support. Own the wobble — that's the work.</div><div class="nudge">Challenge the balance</div></div>
+        <div class="ex-reps">10 each · 10lb KB</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">4</span>
+        <div><div class="ex-name">Band Pull-Apart</div><div class="ex-desc">Slower return. Really feel the squeeze between shoulder blades.</div></div>
+        <div class="ex-reps">20 reps</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">5</span>
+        <div><div class="ex-name">Dumbbell Bicep Curl</div><div class="ex-desc">3-count lower every rep. Slower than Round 1.</div><div class="nudge">Slow the lower</div></div>
+        <div class="ex-reps">12 each · 10lb</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">6</span>
+        <div><div class="ex-name">Dead Bug</div><div class="ex-desc">2-second hold at the bottom. Even slower than Round 1.</div></div>
+        <div class="ex-reps">10 each side</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COOL-DOWN -->
+  <div class="panel cooldown">
+    <div class="top-bar"></div>
+    <div class="section-tag">Cool-Down</div>
+    <div class="panel-header">
+      <div class="panel-title">Let it <em>settle.</em></div>
+      <div class="panel-time">~8 min</div>
+    </div>
+    <div class="music-cue">
+      <span class="music-note">♪</span>
+      <div class="music-songs"><strong>Dreams</strong> — Fleetwood Mac &nbsp;·&nbsp; <strong>Dive</strong> — Olivia Dean</div>
+    </div>
+    <div class="ex-list">
+      <div class="ex-row">
+        <span class="ex-num">1</span>
+        <div><div class="ex-name">Standing Calf Stretch</div><div class="ex-desc">One foot back, heel pressed to floor. Front knee bent. Hold 30 sec each.</div></div>
+        <div class="ex-reps">30 sec each</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">2</span>
+        <div><div class="ex-name">Seated Hamstring Stretch</div><div class="ex-desc">Legs straight, reach toward feet. No bouncing. Breathe into it.</div></div>
+        <div class="ex-reps">45 sec</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">3</span>
+        <div><div class="ex-name">Supine Hamstring with Band</div><div class="ex-desc">On back. Band around one foot, leg toward ceiling. Pull gently. Hold 30 sec each.</div></div>
+        <div class="ex-reps">30 sec each</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">4</span>
+        <div><div class="ex-name">Downward Dog Calf Walk</div><div class="ex-desc">Hips up, hands and feet on mat. Alternate pressing each heel down slowly.</div></div>
+        <div class="ex-reps">60 sec</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">5</span>
+        <div><div class="ex-name">Half-Kneeling Hip Flexor</div><div class="ex-desc">One knee down, one foot forward. Tuck pelvis, lean gently forward. 30 sec each.</div></div>
+        <div class="ex-reps">30 sec each</div>
+      </div>
+      <div class="ex-row">
+        <span class="ex-num">6</span>
+        <div><div class="ex-name">Child's Pose</div><div class="ex-desc">Kneel, hips back, arms long. Forehead down. Just breathe. You earned this.</div></div>
+        <div class="ex-reps">60 sec</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-note"><strong>Protein within the hour.</strong> &nbsp;Water. &nbsp;Same routine until it feels easy — then we add load. &nbsp;·&nbsp; <strong>Walking pad days:</strong> Struts playlist, 20–30 min, 2–4x per week.</div>
+    <div class="phase-tag">PHASE 1 · WEEKS 1–4</div>
+  </div>
+
+</div>
+</body>
+</html>
